@@ -572,6 +572,8 @@ public:
 
     int base_ac_from(const item_def &armour, int scale = 1) const;
 
+    int corrosion_amount() const;
+
     int inaccuracy() const override;
 
     // actor
