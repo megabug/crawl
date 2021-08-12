@@ -206,6 +206,16 @@ bool fill_status_info(int status, status_info& inf)
                           (-1 * you.props["flay_damage"].get_int()));
         break;
 
+    case STATUS_NO_SCROLLS:
+        // Don't double the light if under a duration
+        if (!player_in_branch(BRANCH_GEHENNA) || you.duration[DUR_NO_SCROLLS])
+            break;
+        // use -Scroll as a base
+        _fill_inf_from_ddef(DUR_NO_SCROLLS, inf);
+        inf.short_text = "illegible scrolls";
+        inf.long_text = "Your scrolls are unreadable in the smoke.";
+        break;
+
     case STATUS_NO_POTIONS:
         // Don't double the light if under a duration
         if (!player_in_branch(BRANCH_COCYTUS) || you.duration[DUR_NO_POTIONS])
