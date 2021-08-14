@@ -508,7 +508,7 @@ class CrawlProcessHandlerBase(object):
             self.process.send_signal(subprocess.signal.SIGABRT)
             self.kill_timeout = None
 
-    interesting_info = ("xl", "char", "place", "god", "title")
+    interesting_info = ("xl", "char", "place", "turn", "god", "title")
     def set_where_info(self, newwhere):
         interesting = False
         for key in CrawlProcessHandlerBase.interesting_info:
@@ -549,6 +549,8 @@ class CrawlProcessHandlerBase(object):
             "idle_time": (self.idle_time() if self.is_idle() else 0),
             "game_id": self.game_params["id"],
             }
+        if self.wheretime and "dur" in self.where:
+            entry["dur"] = int(self.where["dur"]) + int(time.time() - self.wheretime)
         for key in CrawlProcessHandlerBase.interesting_info:
             if key in self.where:
                 entry[key] = self.where[key]

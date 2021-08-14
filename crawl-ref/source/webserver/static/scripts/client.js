@@ -1087,9 +1087,19 @@ function (exports, $, key_conversion, chat, comm) {
             new_list.append(entry);
         }
 
-        function set(key, value)
+        function set(key, value, time)
         {
-            entry.find("." + key).html(value);
+            var e = entry.find("." + key);
+
+            e.html(value);
+
+            if (time !== undefined)
+            {
+                e.data("time", time)
+                    .attr("data-time", "" + time);
+                e.data("sort", "" + time)
+                    .attr("data-sort", "" + time);
+            }
         }
 
         var username_entry = $(make_watch_link(data));
@@ -1099,15 +1109,11 @@ function (exports, $, key_conversion, chat, comm) {
         set("xl", data.xl);
         set("char", data.char);
         set("place", data.place);
+        set("turn", data.turn);
+        set("dur", format_duration(data.dur), data.dur);
         set("god", data.god || "");
         set("title", data.title);
-        set("idle_time", format_idle_time(data.idle_time));
-        entry.find(".idle_time")
-            .data("time", data.idle_time)
-            .attr("data-time", "" + data.idle_time);
-        entry.find(".idle_time")
-            .data("sort", "" + data.idle_time)
-            .attr("data-sort", "" + data.idle_time);
+        set("idle_time", format_idle_time(data.idle_time), data.idle_time);
         set("spectator_count", data.spectator_count > 0 ? data.spectator_count : "");
         if (entry.find(".milestone").text() !== data.milestone)
         {
@@ -1121,16 +1127,17 @@ function (exports, $, key_conversion, chat, comm) {
             lobby_complete();
     }
 
-    var lobby_idle_timer = setInterval(update_lobby_idle_times, 1000);
-    function update_lobby_idle_times()
+    var lobby_timer = setInterval(update_lobby_times, 1000);
+    function update_lobby_times()
     {
-        $("#player_list .idle_time").each(function () {
+        $("#player_list .dur, #player_list .idle_time").each(function () {
             var $this = $(this);
             var time = $this.data("time");
             if (time)
             {
                 time++;
-                $this.html(format_idle_time(time));
+                $this.html($this.attr("class") === "dur" ?
+                    format_duration(time) : format_idle_time(time));
                 $this.data("time", time)
                     .attr("data-time", "" + time);
                 $this.data("sort", "" + time)
@@ -1179,6 +1186,29 @@ function (exports, $, key_conversion, chat, comm) {
         return "<a href='#watch-" + data.username + "'></a>";
     }
 
+    function format_duration(seconds)
+    {
+        var elem = $("<span></span>");
+        if (seconds == 0)
+        {
+            elem.text("");
+        }
+        else if (seconds < 60)
+        {
+            elem.text(seconds + "s");
+        }
+        else if (seconds < (60 * 60))
+        {
+            elem.text(Math.floor(seconds / 60) + "m");
+        }
+        else
+        {
+            elem.text(Math.floor(seconds / (60 * 60)) + "h " +
+                (Math.floor(seconds / 60) % 60) + "m");
+        }
+        return elem;
+    }
+
     function format_idle_time(seconds)
     {
         var elem = $("<span></span>");
@@ -1188,15 +1218,15 @@ function (exports, $, key_conversion, chat, comm) {
         }
         else if (seconds < 120)
         {
-            elem.text(seconds + " s");
+            elem.text(seconds + "s");
         }
         else if (seconds < (60 * 60))
         {
-            elem.text(Math.round(seconds / 60) + " min");
+            elem.text(Math.round(seconds / 60) + "m");
         }
         else
         {
-            elem.text(Math.round(seconds / (60 * 60)) + " h");
+            elem.text(Math.round(seconds / (60 * 60)) + "h");
         }
         return elem;
     }
